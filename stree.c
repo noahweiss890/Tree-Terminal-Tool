@@ -64,9 +64,9 @@ void print_tree_recursive(const char *path, const char *prefix, const char *name
 
     printf("%s", prefix);
     if (is_last) {
-        printf("└─ ");
+        printf("└── ");
     } else {
-        printf("├─ ");
+        printf("├── ");
     }
 
     printf("[");
@@ -76,14 +76,12 @@ void print_tree_recursive(const char *path, const char *prefix, const char *name
     print_owner(st.st_uid);
     printf("   ");
     print_group(st.st_gid);
-    printf("          ");
+    printf("        ");
     print_size(st.st_size);
 
     printf("]");
 
     printf("  %s\n", name);
-
-    // printf("%s\n", prefix);
 
     if (S_ISDIR(st.st_mode)) {
         DIR *dir = opendir(path);
@@ -114,6 +112,38 @@ void print_tree_recursive(const char *path, const char *prefix, const char *name
     }
 }
 
+void first_tree_recursive(const char *path) {
+    struct stat st;
+    if (lstat(path, &st) != 0) {
+        perror("lstat");
+        exit(EXIT_FAILURE);
+    }
+    if (S_ISDIR(st.st_mode)) {
+        DIR *dir = opendir(path);
+        if (dir == NULL) {
+            perror("opendir");
+            exit(EXIT_FAILURE);
+        }
+        struct dirent *entry;
+        int count = 0;
+        int num_entries = size_of_directory(path);
+        while ((entry = readdir(dir)) != NULL) {
+            if (entry->d_name[0] == '.') {
+                continue;
+            }
+            count++;
+
+            char child_path[1024];
+            snprintf(child_path, sizeof(child_path), "%s/%s", path, entry->d_name);
+
+            int is_last_entry = count == num_entries;
+
+            print_tree_recursive(child_path, "", entry->d_name, is_last_entry);
+        }
+        closedir(dir);
+    }
+}
+
 
 int main(int argc, char *argv[]) {
     const char *path;
@@ -123,7 +153,9 @@ int main(int argc, char *argv[]) {
         path = ".";
     }
 
-    print_tree_recursive(path, "", path, 1);
+    printf("%s\n", path);
+
+    first_tree_recursive(path);
 
     return 0;
 }
