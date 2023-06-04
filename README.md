@@ -1,4 +1,4 @@
-# Tree-Terminal-Tool
+# Tree Terminal Tool
 
 This is my implementation of the “tree” tool, in a long mode. Meaning printing the file tree with it’s permitions, user and group, and size.
 
