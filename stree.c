@@ -8,6 +8,9 @@
 #include <grp.h>
 #include <limits.h>
 
+int directories = 0;
+int files = 0;
+
 void print_tree(const char *path, const char *prefix);
 
 void print_permissions(mode_t mode) {
@@ -62,6 +65,9 @@ void print_tree_recursive(const char *path, const char *prefix, const char *name
         exit(EXIT_FAILURE);
     }
 
+
+    S_ISDIR(st.st_mode) ? directories++ : files++;
+
     printf("%s", prefix);
     if (is_last) {
         printf("└── ");
@@ -74,7 +80,7 @@ void print_tree_recursive(const char *path, const char *prefix, const char *name
     print_permissions(st.st_mode);
     printf(" ");
     print_owner(st.st_uid);
-    printf("   ");
+    printf(" ");
     print_group(st.st_gid);
     printf("        ");
     print_size(st.st_size);
@@ -156,6 +162,8 @@ int main(int argc, char *argv[]) {
     printf("%s\n", path);
 
     first_tree_recursive(path);
+
+    printf("\n%d directories, %d files\n", directories, files);
 
     return 0;
 }
